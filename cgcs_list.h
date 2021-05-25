@@ -206,11 +206,48 @@ cgcs_slpopf_freefn(cgcs_slist *self, void (*freefn)(void *)) {
     cgcs_sleraseaft_freefn(self, cgcs_slbefbegin(self), freefn);
 }
 
+/*!
+    \def        USE_CGCS_SLIST
+    \brief      Macro to omit 'cgcs_' namespace prefix for all public cgcs_slist identifiers
+    \details    Use '#define USE_CGCS_SLIST' before #include "cgcs_list.h"
+ */
 #ifdef USE_CGCS_SLIST
 # define USE_CGCS_SLIST
 
 typedef cgcs_slist slist;
 typedef cgcs_slist_iterator slist_iterator;
+
+#define slinit(self)                                cgcs_slinit(self)
+#define sldeinit(self)                              cgcs_sldeinit(self)
+#define sldeinit_freefn(self, freefn)               cgcs_sldeinit_freefn(self, freefn)
+
+#define slfront(self)                               cgcs_slfront(self)
+#define slempty(self)                               cgcs_slempty(self)
+
+#define slbefbegin(self)                            cgcs_slbefbegin(self)
+#define slbegin(self)                               cgcs_slbegin(self)
+#define slend(self)                                 cgcs_slend(self)
+
+#define slinsertaft(self, it, data)                 cgcs_slinsertaft(self, it, data)
+#define slinsertaft_allocfn(self, i, d, a)          cgcs_slinsertaft_allocfn(self, i, d, a)
+#define sleraseaft(self, it)                        cgcs_sleraseaft(self, it)
+#define sleraseaft_freefn(self, it, freefn)         cgcs_sleraseaft_freefn(self, it, freefn)
+
+#define slpushf(self, data)                         cgcs_slpushf(self, data)
+#define slpushf_allocfn(self, data, allocfn)        cgcs_slpushf_allocfn(self, data, allocfn)
+#define slpopf(self)                                cgcs_slpopf(self)
+#define slpopf_freefn(self, freefn)                 cgcs_slpopf(self, freefn)
+
+#define slforeach(self, func)                       cgcs_slforeach(self, func)
+#define slforeach_range(self, func, beg, end)       cgcs_slforeach_range(self, func, beg, end)
+
+#define slfind(self, cmpfn, data)                   cgcs_slfind(self, cmpfn, data)
+#define slfind_range(self, cmpfn, data, beg, end)   cgcs_slfind_range(self, cmpfn, data, beg, end)
+
+#define slnew()                                     cgcs_slnew()
+#define slnew_allocfn(allocfn)                      cgcs_slnew_allocfn(allocfn)
+#define sldelete(sl)                                cgcs_sldelete(sl)
+#define sldelete_freefn(sl, freefn)                 cgcs_sldelete_freenf(sl, freefn)
 
 // TODO: More shorthand notation, as per cgcs_vector
 
