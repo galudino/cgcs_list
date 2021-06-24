@@ -59,9 +59,43 @@ int main(int argc, const char *argv[]) {
     printf("{");
     lforeach(l, print_cstr);
     printf("}\n");
+    
+    str = "Foxtrot";
+    it = lfind(l, cmp_cstr, &str);
+    
+    printf("key searched for: %s, found: %s\n", str, (char *)(it->m_data));
+    free(it->m_data);
+    lerase(l, it);
+
+    printf("{");
+    lforeach(l, print_cstr);
+    printf("}\n");
 
     lforeach(l, free_cstr);
     ldeinit(l);
 
+    cgcs_list intlist, *il = &intlist;
+    linit(il);
+
+    for (int i = 0; i < 10; i++) {
+        lpushb(il, &i);
+    }
+
+    printf("{");
+    lforeach(il, print_int);
+    printf("}\n");
+
+    int key = 6;
+    cgcs_list_iterator iter = lfind(il, cmp_int, &key);
+
+    lerase(il, iter);
+
+    printf("{");
+    lforeach(il, print_int);
+    printf("}\n");
+
+    ldeinit(il);
+
     return 0;
 }
+

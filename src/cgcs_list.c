@@ -10,12 +10,7 @@
 
 #include <stdio.h>
 
-static struct cgcs_listnode *cgcs_lnnew(const void *data);
-static struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t));
-static void cgcs_lndelete(struct cgcs_listnode *node);
-static void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *));
-
-static struct cgcs_listnode *cgcs_lnnew(const void *data) {
+struct cgcs_listnode *cgcs_lnnew(const void *data) {
     struct cgcs_listnode *node = malloc(sizeof *node);
     assert(node);
 
@@ -23,7 +18,7 @@ static struct cgcs_listnode *cgcs_lnnew(const void *data) {
     return node;
 }
 
-static struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t)) {
+struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t)) {
     struct cgcs_listnode *node = allocfn(sizeof *node);
     assert(node);
 
@@ -31,12 +26,12 @@ static struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocf
     return node;
 }
 
-static void cgcs_lndelete(struct cgcs_listnode *node) {
+void cgcs_lndelete(struct cgcs_listnode *node) {
     cgcs_lndeinit(node);
     free(node);
 }
 
-static void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *)) {
+void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *)) {
     cgcs_lndeinit(node);
     freefn(node);
 }

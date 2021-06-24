@@ -31,28 +31,22 @@ static void cgcs_lndeinit(struct cgcs_listnode *self);
 static void cgcs_lnhook(struct cgcs_listnode *x, struct cgcs_listnode *y);
 static void cgcs_lnunhook(struct cgcs_listnode *y);
 
-struct cgcs_listnode *lnnew(const void *data);
-struct cgcs_listnode *lnnew_allocfn(const void *data, void *(*allocfn)(size_t));
+struct cgcs_listnode *cgcs_lnnew(const void *data);
+struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t));
 
-static void lndelete(struct cgcs_listnode *node);
-static void lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *));
+void cgcs_lndelete(struct cgcs_listnode *node);
+void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *));
 
-struct cgcs_listnode *lnnew(const void *data);
-struct cgcs_listnode *lnnew_allocfn(const void *data, void *(*allocfn)(size_t));
-
-static void lndelete(struct cgcs_listnode *node);
-static void lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *));
-
-static void cgcs_lninit(struct cgcs_listnode *self, const void *data) {
+static inline void cgcs_lninit(struct cgcs_listnode *self, const void *data) {
     self->m_next = self->m_prev = (struct cgcs_listnode *)(0);
     memcpy(&(self->m_data), data, sizeof(void *));
 }
 
-static void cgcs_lndeinit(struct cgcs_listnode *self) {
+static inline void cgcs_lndeinit(struct cgcs_listnode *self) {
     self->m_next = self->m_prev = (struct cgcs_listnode *)(0);
 }
 
-static void cgcs_lnhook(struct cgcs_listnode *x, struct cgcs_listnode *y) {
+static inline void cgcs_lnhook(struct cgcs_listnode *x, struct cgcs_listnode *y) {
     // x is new node, y is the desired position
     x->m_next = y;
     x->m_prev = y->m_prev;
@@ -61,7 +55,7 @@ static void cgcs_lnhook(struct cgcs_listnode *x, struct cgcs_listnode *y) {
     y->m_prev = x;
 }
 
-static void cgcs_lnunhook(struct cgcs_listnode *y) {
+static inline void cgcs_lnunhook(struct cgcs_listnode *y) {
     y->m_prev->m_next = y->m_next;
     y->m_next->m_prev = y->m_prev;
 }
@@ -116,64 +110,64 @@ cgcs_list *cgcs_lnew_allocfn(void *(*allocfn)(size_t));
 void cgcs_ldelete(cgcs_list *l);
 void cgcs_ldelete_freefn(cgcs_list *l, void (*freefn)(void *));
 
-static void cgcs_linit(cgcs_list *self) {
+static inline void cgcs_linit(cgcs_list *self) {
     self->m_impl.m_next = &(self->m_impl);
     self->m_impl.m_prev = &(self->m_impl);
 }
 
-static voidptr cgcs_lfront(cgcs_list *self) {
+static inline voidptr cgcs_lfront(cgcs_list *self) {
     return cgcs_lbegin(self)->m_data;
 }
 
-static voidptr cgcs_lback(cgcs_list *self) {
+static inline voidptr cgcs_lback(cgcs_list *self) {
     return self->m_impl.m_prev->m_data;
 }
 
-static bool cgcs_lempty(cgcs_list *self) {
+static inline bool cgcs_lempty(cgcs_list *self) {
     return cgcs_lbegin(self) == cgcs_lend(self);
 }
 
-static cgcs_list_iterator cgcs_lbegin(cgcs_list *self) {
+static inline cgcs_list_iterator cgcs_lbegin(cgcs_list *self) {
     return self->m_impl.m_next;
 }
 
-static cgcs_list_iterator cgcs_lbefend(cgcs_list *self) {
+static inline cgcs_list_iterator cgcs_lbefend(cgcs_list *self) {
     return self->m_impl.m_prev;
 }
 
-static cgcs_list_iterator cgcs_lend(cgcs_list *self) {
+static inline cgcs_list_iterator cgcs_lend(cgcs_list *self) {
     return &(self->m_impl);
 }
 
-static void cgcs_lpushf(cgcs_list *self, const void *data) {
+static inline void cgcs_lpushf(cgcs_list *self, const void *data) {
     cgcs_linsert(self, cgcs_lbegin(self), data);
 }
 
-static void cgcs_lpushf_allocfn(cgcs_list *self, const void *data, void *(*allocfn)(size_t)) {
+static inline void cgcs_lpushf_allocfn(cgcs_list *self, const void *data, void *(*allocfn)(size_t)) {
     cgcs_linsert_allocfn(self, cgcs_lbegin(self), data, allocfn);
 }
 
-static void cgcs_lpopf(cgcs_list *self) {
+static inline void cgcs_lpopf(cgcs_list *self) {
     cgcs_lerase(self, cgcs_lbegin(self));
 }
 
-static void cgcs_lpopf_freefn(cgcs_list *self, void (*freefn)(void *)) {
+static inline void cgcs_lpopf_freefn(cgcs_list *self, void (*freefn)(void *)) {
     cgcs_lerase_freefn(self, cgcs_lbegin(self), freefn);
 }
 
-static void cgcs_lpushb(cgcs_list *self, const void *data) {
+static inline void cgcs_lpushb(cgcs_list *self, const void *data) {
     cgcs_linsert(self, cgcs_lend(self), data);
 }
 
-static void cgcs_lpushb_allocfn(cgcs_list *self, const void *data, void *(*allocfn)(size_t)) {
+static inline void cgcs_lpushb_allocfn(cgcs_list *self, const void *data, void *(*allocfn)(size_t)) {
     cgcs_linsert_allocfn(self, cgcs_lend(self), data, allocfn);
 }
 
-static void cgcs_lpopb(cgcs_list *self) {
+static inline void cgcs_lpopb(cgcs_list *self) {
     cgcs_lerase(self, cgcs_lbefend(self));
 }
 
-static void cgcs_lpopb_freefn(cgcs_list *self, void (*freefn)(void *)) {
+static inline void cgcs_lpopb_freefn(cgcs_list *self, void (*freefn)(void *)) {
     cgcs_lerase_freefn(self, cgcs_lbefend(self), freefn);
 }
 
