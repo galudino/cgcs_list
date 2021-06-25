@@ -40,9 +40,31 @@ cgcs_lnfindfwd(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *dat
 }
 
 struct cgcs_listnode *
+cgcs_lnfindfwd_b(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (^cmp_b)(const void *, const void *)) {
+    for (struct cgcs_listnode *curr = x; curr != y; curr = curr->m_next) {
+        if (cmp_b(curr->m_data, data) == 0) {
+            return curr;
+        }
+    }
+
+    return NULL;
+}
+
+struct cgcs_listnode *
 cgcs_lnfindbkw(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (*cmpfn)(const void *, const void *)) {
     for (struct cgcs_listnode *curr = x; curr != y; curr = curr->m_prev) {
         if (cmpfn(curr->m_data, data) == 0) {
+            return curr;
+        }
+    }
+
+    return NULL;
+}
+
+struct cgcs_listnode *
+cgcs_lnfindbkw_b(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (^cmp_b)(const void *, const void *)) {
+    for (struct cgcs_listnode *curr = x; curr != y; curr = curr->m_prev) {
+        if (cmp_b(curr->m_data, data) == 0) {
             return curr;
         }
     }
