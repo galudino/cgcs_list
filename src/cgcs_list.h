@@ -293,7 +293,9 @@ static inline void cgcs_lpopb_freefn(cgcs_list *self, void (*freefn)(void *)) {
 #define lnclear_freefn(x, y, freefn)    cgcs_lnclear_freefn(x, y, freefn)
 
 #define lnfindfwd(x, y, data, cmpfn) cgcs_lnfindfwd(x, y, data, cmpfn)
+#define lnfindfwd_b(x, y, data, cmp_b) cgcs_lnfindfwd(x, y, data, cmp_b)
 #define lnfindbkw(x, y, data, cmpfn) cgcs_lnfindbkw(x, y, data, cmpfn)
+#define lnfindbkw_b(x, y, data, cmp_b) cgcs_lnfindbkw(x, y, data, cmp_b)
 
 #define lnadvance(x, index) cgcs_lnadvance(x, index)
 #define lngetnode(x, index) cgcs_lngetnode(x, index)
