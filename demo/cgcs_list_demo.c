@@ -6,7 +6,6 @@
     \date       23 Jun 2021
  */
 
-#define USE_CGCS_LIST
 #include "cgcs_list.h"
 
 #include <stdio.h>
@@ -29,8 +28,8 @@ static inline int cmp_int(const void *lhs, const void *rhs) {
 }
 
 int main(int argc, const char *argv[]) {
-    cgcs_list list, *l = &list;
-    linit(l);
+    list_t list, *l = &list;
+    list_init(l);
 
     const char *items[] = {
         "Beta", "Delta", "Alpha", "Charlie", "Foxtrot", "Golf", "Echo"
@@ -40,61 +39,61 @@ int main(int argc, const char *argv[]) {
 
     for (int i = 0; i < size; i++) {
         char *str = strdup(items[i]);
-        lpushb(l, &str);
+        list_push_back(l, &str);
     }
 
     printf("{");
-    lforeach(l, print_cstr);
+    list_foreach(l, print_cstr);
     printf("}\n");
 
-    cgcs_list_iterator it = lbegin(l);
+    list_iterator_t it = list_begin(l);
     for (int i = 0; i < 3; i++) {
         it = it->m_next;
     }
 
     char *str = strdup("Inserted");
 
-    linsert(l, it, &str);
+    list_insert(l, it, &str);
 
     printf("{");
-    lforeach(l, print_cstr);
+    list_foreach(l, print_cstr);
     printf("}\n");
     
     str = "Foxtrot";
-    it = lfind(l, cmp_cstr, &str);
+    it = list_find(l, cmp_cstr, &str);
     
     printf("key searched for: %s, found: %s\n", str, (char *)(it->m_data));
     free(it->m_data);
-    lerase(l, it);
+    list_erase(l, it);
 
     printf("{");
-    lforeach(l, print_cstr);
+    list_foreach(l, print_cstr);
     printf("}\n");
 
-    lforeach(l, free_cstr);
-    ldeinit(l);
+    list_foreach(l, free_cstr);
+    list_deinit(l);
 
-    cgcs_list intlist, *il = &intlist;
-    linit(il);
+    list_t intlist, *il = &intlist;
+    list_init(il);
 
     for (int i = 0; i < 10; i++) {
-        lpushb(il, &i);
+        list_push_back(il, &i);
     }
 
     printf("{");
-    lforeach(il, print_int);
+    list_foreach(il, print_int);
     printf("}\n");
 
     int key = 6;
-    cgcs_list_iterator iter = lfind(il, cmp_int, &key);
+    list_iterator_t iter = list_find(il, cmp_int, &key);
 
-    lerase(il, iter);
+    list_erase(il, iter);
 
     printf("{");
-    lforeach(il, print_int);
+    list_foreach(il, print_int);
     printf("}\n");
 
-    ldeinit(il);
+    list_deinit(il);
 
     return 0;
 }
