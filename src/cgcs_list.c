@@ -10,30 +10,123 @@
 
 #include <stdio.h>
 
-struct cgcs_listnode *cgcs_lnnew(const void *data) {
-    struct cgcs_listnode *node = malloc(sizeof *node);
-    assert(node);
+struct cgcs_listnode *
+cgcs_lnclear(struct cgcs_listnode *x, struct cgcs_listnode *y) {
+    while (x != y) {
+        x = cgcs_lnerase(x);
+    }
 
-    cgcs_lninit(node, data);
-    return node;
+    return y;
 }
 
-struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t)) {
-    struct cgcs_listnode *node = allocfn(sizeof *node);
-    assert(node);
+struct cgcs_listnode *
+cgcs_lnclear_freefn(struct cgcs_listnode *x, struct cgcs_listnode *y, void (*freefn)(void *)) {
+    while (x != y) {
+        x = cgcs_lnerase_freefn(x, freefn);
+    }
 
-    cgcs_lninit(node, data);
-    return node;
+    return y;
 }
 
-void cgcs_lndelete(struct cgcs_listnode *node) {
-    cgcs_lndeinit(node);
-    free(node);
+struct cgcs_listnode *
+cgcs_lnfindfwd(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (*cmpfn)(const void *, const void *)) {
+    for (struct cgcs_listnode *curr = x; curr != y; curr = curr->m_next) {
+        if (cmpfn(curr->m_data, data) == 0) {
+            return curr;
+        }
+    }
+
+    return NULL;
 }
 
-void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *)) {
-    cgcs_lndeinit(node);
-    freefn(node);
+struct cgcs_listnode *
+cgcs_lnfindbkw(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (*cmpfn)(const void *, const void *)) {
+    for (struct cgcs_listnode *curr = x; curr != y; curr = curr->m_prev) {
+        if (cmpfn(curr->m_data, data) == 0) {
+            return curr;
+        }
+    }
+
+    return NULL;
+}
+
+struct cgcs_listnode *
+cgcs_lnadvance(struct cgcs_listnode **x, int index) {
+    if (index > 0) {
+        for (int i = 0; i < index; i++) {
+            (*x) = (*x)->m_next;
+        }
+    } else {
+        for (int i = index; i >= 0; i--) {
+            (*x) = (*x)->m_prev;
+        }
+    }
+
+    return (*x);
+}
+
+struct cgcs_listnode *
+cgcs_lngetnode(struct cgcs_listnode *x, int index) {
+    return cgcs_lnadvance(&x, index);
+}
+
+void cgcs_lnswap(struct cgcs_listnode *x, struct cgcs_listnode *y) {
+    if (x->m_next != x) {
+        if (y->m_next != y) {
+            // both x and y are not empty
+            struct cgcs_listnode *temp_x_next = x->m_next;
+            struct cgcs_listnode *temp_x_prev = x->m_prev;
+
+            x->m_next = y->m_next;
+            y->m_next = temp_x_next;
+
+            x->m_prev = y->m_prev;
+            y->m_prev = temp_x_prev;
+        } else {
+            // x is not empty, y is empty
+            y->m_next = x->m_next;
+            y->m_prev = x->m_prev;
+
+            y->m_next->m_prev = y;
+            y->m_prev->m_next = y;
+
+            x->m_next = x;
+            x->m_prev = x;
+        }
+    } else if (y->m_next != y) {
+        // x is empty, y is not empty
+        x->m_next = y->m_next;
+        x->m_prev = y->m_prev;
+        x->m_next->m_prev = x->m_prev->m_next = x;
+        y->m_next = y->m_prev = y;
+    }
+}
+
+void cgcs_lnreverse(struct cgcs_listnode *x) {
+    struct cgcs_listnode *temp = x;
+
+    do {
+        struct cgcs_listnode *temp_next = temp->m_next;
+        temp->m_next = temp->m_prev;
+        temp->m_prev = temp_next;
+
+        temp = temp->m_prev;
+    } while (temp != x);
+}
+
+void cgcs_lntransfer(struct cgcs_listnode *x, struct cgcs_listnode *first, struct cgcs_listnode *last) {
+    if (x != last) {
+        // remove [first, last) from its old position
+        last->m_prev->m_next = x;
+        first->m_prev->m_next = last;
+        x->m_prev->m_next = first;
+
+        // splice [first, last) into its new position
+        struct cgcs_listnode *temp_x_prev = x->m_prev;
+        x->m_prev = last->m_prev;
+        last->m_prev = first->m_prev;
+        first->m_prev = temp_x_prev;
+    }
 }
 
 void cgcs_ldeinit(cgcs_list *self) {

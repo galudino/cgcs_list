@@ -31,11 +31,45 @@ static void cgcs_lndeinit(struct cgcs_listnode *self);
 static void cgcs_lnhook(struct cgcs_listnode *x, struct cgcs_listnode *y);
 static void cgcs_lnunhook(struct cgcs_listnode *y);
 
-struct cgcs_listnode *cgcs_lnnew(const void *data);
-struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t));
+static struct cgcs_listnode *cgcs_lnnew(const void *data);
+static struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t));
 
-void cgcs_lndelete(struct cgcs_listnode *node);
-void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *));
+static void cgcs_lndelete(struct cgcs_listnode *node);
+static void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *));
+
+static struct cgcs_listnode *
+cgcs_lninsert(struct cgcs_listnode *x, const void *data);
+
+static struct cgcs_listnode *
+cgcs_lninsert_allocfn(struct cgcs_listnode *x, const void *data, void *(*allocfn)(size_t));
+
+static struct cgcs_listnode *
+cgcs_lnerase(struct cgcs_listnode *x);
+
+static struct cgcs_listnode *
+cgcs_lnerase_freefn(struct cgcs_listnode *x, void (*freefn)(void *));
+
+struct cgcs_listnode *
+cgcs_lnclear(struct cgcs_listnode *x, struct cgcs_listnode *y);
+
+struct cgcs_listnode *
+cgcs_lnclear_freefn(struct cgcs_listnode *x, struct cgcs_listnode *y, void (*freefn)(void *));
+
+struct cgcs_listnode *
+cgcs_lnfindfwd(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (*cmpfn)(const void *, const void *));
+
+struct cgcs_listnode *
+cgcs_lnfindbkw(struct cgcs_listnode *x, struct cgcs_listnode *y, const void *data, int (*cmpfn)(const void *, const void *));
+
+struct cgcs_listnode *
+cgcs_lnadvance(struct cgcs_listnode **x, int index);
+
+struct cgcs_listnode *
+cgcs_lngetnode(struct cgcs_listnode *x, int index);
+
+void cgcs_lnswap(struct cgcs_listnode *x, struct cgcs_listnode *y);
+void cgcs_lnreverse(struct cgcs_listnode *x);
+void cgcs_lntransfer(struct cgcs_listnode *x, struct cgcs_listnode *first, struct cgcs_listnode *last);
 
 static inline void cgcs_lninit(struct cgcs_listnode *self, const void *data) {
     self->m_next = self->m_prev = (struct cgcs_listnode *)(0);
@@ -58,6 +92,66 @@ static inline void cgcs_lnhook(struct cgcs_listnode *x, struct cgcs_listnode *y)
 static inline void cgcs_lnunhook(struct cgcs_listnode *y) {
     y->m_prev->m_next = y->m_next;
     y->m_next->m_prev = y->m_prev;
+}
+
+static inline
+struct cgcs_listnode *cgcs_lnnew(const void *data) {
+    struct cgcs_listnode *node = malloc(sizeof *node);
+    assert(node);
+
+    cgcs_lninit(node, data);
+    return node;
+}
+
+static inline
+struct cgcs_listnode *cgcs_lnnew_allocfn(const void *data, void *(*allocfn)(size_t)) {
+    struct cgcs_listnode *node = allocfn(sizeof *node);
+    assert(node);
+
+    cgcs_lninit(node, data);
+    return node;
+}
+
+static inline 
+void cgcs_lndelete(struct cgcs_listnode *node) {
+    cgcs_lndeinit(node);
+    free(node);
+}
+
+static inline 
+void cgcs_lndelete_freefn(struct cgcs_listnode *node, void (*freefn)(void *)) {
+    cgcs_lndeinit(node);
+    freefn(node);
+}
+
+static inline struct cgcs_listnode *
+cgcs_lninsert(struct cgcs_listnode *x, const void *data) {
+    struct cgcs_listnode *new_node = cgcs_lnnew(data);
+    cgcs_lnhook(new_node, x);
+    return x;
+}
+
+static inline struct cgcs_listnode *
+cgcs_lninsert_allocfn(struct cgcs_listnode *x, const void *data, void *(*allocfn)(size_t)) {
+    struct cgcs_listnode *new_node = cgcs_lnnew_allocfn(data, allocfn);
+    cgcs_lnhook(new_node, x);
+    return x;
+}
+
+static inline struct cgcs_listnode *
+cgcs_lnerase(struct cgcs_listnode *x) {
+    struct cgcs_listnode *next = x->m_next;
+    cgcs_lnunhook(x);
+    cgcs_lndelete(x);
+    return next;
+}
+
+static inline struct cgcs_listnode *
+cgcs_lnerase_freefn(struct cgcs_listnode *x, void (*freefn)(void *)) {
+    struct cgcs_listnode *next = x->m_next;
+    cgcs_lnunhook(x);
+    cgcs_lndelete_freefn(x, freefn);
+    return next;
 }
 
 typedef struct cgcs_list cgcs_list;
@@ -173,6 +267,34 @@ static inline void cgcs_lpopb_freefn(cgcs_list *self, void (*freefn)(void *)) {
 
 #ifdef USE_CGCS_LIST
 # define USE_CGCS_LIST
+
+#define lninit(self, data)          cgcs_lninit(self, data)
+#define lndeinit(self)              cgcs_lndeinit(self)
+
+#define lnnew(data)                     cgcs_lnnew(data)
+#define lnnew_allocfn(data, allocfn)    cgcs_lnnew_allocfn(data, allocfn)
+
+#define lndelete(node)                  cgcs_lndelete(node)
+#define lndelete_freefn(node, freefn)   cgcs_lndelete_freefn(node, freefn)
+
+#define lninsert(x, data)                   cgcs_lninsert(x, data)
+#define lninsert_allocfn(x, data, allocfn)  cgcs_lninsert_allocfn(x, data, allocfn)
+
+#define lnerase(x)                  cgcs_lnerase(x)
+#define lnerase_freefn(x, freefn)   cgcs_lnerase_freefn(x)
+
+#define lnclear(x, y)                   cgcs_lnclear(x, y)
+#define lnclear_freefn(x, y, freefn)    cgcs_lnclear_freefn(x, y, freefn)
+
+#define lnfindfwd(x, y, data, cmpfn) cgcs_lnfindfwd(x, y, data, cmpfn)
+#define lnfindbkw(x, y, data, cmpfn) cgcs_lnfindbkw(x, y, data, cmpfn)
+
+#define lnadvance(x, index) cgcs_lnadvance(x, index)
+#define lngetnode(x, index) cgcs_lngetnode(x, index)
+
+#define lnswap(x, y)    cgcs_lnswap(x, y)
+#define lnreverse(x)    cgcs_lnreverse(x)
+#define lntransfer(x, first, last) cgcs_lntransfer(x, first, last)
 
 #define linit(self) cgcs_linit(self)
 #define ldeinit(self) cgcs_ldeinit(self)
